@@ -7,18 +7,17 @@ Input: Frequency for source wavelet, depth model for P velocity and density (opt
 
 3)Convert** from depth to two way time, obtaining a matrix (TWT). TWT has the same dimension of AI, velocity and density. It gives the time coordinate that each propety occurs.
 
-4)Verify the TMAX=max(TWT[-1,:]). TMAX is the maximum time and it should be considered in order to have all the depth model considered in the final result. Each column must be resampled until TMAX   
+4)Verify the TMAX=max(TWT[-1,:]). TMAX is the maximum time and it should be considered in order to have all the depth model considered in the final result. Each column must be resampled until TMAX.   
 
-5)Choose the sampling time (ST), 2ms or 4ms are the more common. Calculate the number of lines of the TWT_RS(TWT resampled)=ceil(TMAX/ST). TWT_RS[1,:]=0;TWT_RS[n,:]=TWT_RS[n-1,:]+ST; 
+5)Choose the sampling time (ST), 2ms or 4ms are the more common. Calculate the number of lines of the TWT_RS(TWT resampled)=zeros(ceil(TMAX/ST)). TWT_RS[n]=TWT_RS[n-1]+ST; 
 
-6)For each column, do the following: 
-	lim=ceil(TWT[-1,n]/ST);	
-	i)Give RC[:,n], TWT[:,n], TWT_RS[1:lim ,n]  for a python interpolate function.
-	ii)The result will be RC_ts[1:lim,n].
-	iii)Then, take: if(TWT[-1,n]/ST-lim/=0) RC_ts[lim:,n]=0.0 else RC_ts[lim+1:,n]=0.0 
+6)Take zeros(RC_ts(ceil(TMAX/ST),N)). For each column, do the following: 
+	lim=ceil(TWT[-1,n]/ST)-1;
+	i)Give RC[:,n], TWT[:,n], TWT_RS[0:lim,n], RC_ts[0:lim,n]  for a python interpolate function.
+	ii)The result will be RC_ts[0:lim,n].
+	iii)Then, take: if(TWT[-1,n]/ST-lim+1 /= 0) RC_ts[lim-1,n]=0. ##MAYBE UNNECESSARY, DEPENDS HOW THE INTERPOLATION WORKS##
 
-
-6)Calculate the convolution of RC_ts with wavelet. The result has the length: len(RC_ts)+len(wavelet)-1
+6)Calculate the convolution of RC_ts with the wavelet****. The result has the length: len(RC_ts)+len(wavelet)-1
 
 6)Cut len(wavelet)/2 from the beggining and from the end of the result. 
 
@@ -30,5 +29,7 @@ Output: matrix with the corresponding two way times for each depth
 2)Second line: TWT[1,:]=TWT[0,:]+2*dz/velocity[1,:]
 3)TWT[n,:]=TWT[n-1,:]+2*dz/velocity[n,:]
 
-
 ***Yilmaz, Ch.2, pg.165:"From well-log measurements, we find that the vertical density gradient often is much smaller than the vertical velocity gradient.Therefore, we often assume that the impedance contrast between rock layers is essentially due to the velocity contrast, only."
+
+****Wavelet
+
